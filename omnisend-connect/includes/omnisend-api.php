@@ -45,6 +45,7 @@ function omnisend_get_system_status() {
 			'contact_tag_status'                 => Omnisend_Settings::get_contact_tag_status(),
 			'contact_tag'                        => Omnisend_Settings::get_contact_tag(),
 			'logs_status'                        => Omnisend_Settings::get_logs_status(),
+			'debug_logs_status'                  => Omnisend_Settings::get_debug_logs_status(),
 			'brand_id'                           => Omnisend_Settings::get_brand_id(),
 		),
 	);
@@ -80,6 +81,10 @@ function omnisend_post_omnisend_settings( WP_REST_Request $request ) {
 
 	if ( isset( $body['logs_status'] ) ) {
 		Omnisend_Settings::set_logs_status( $body['logs_status'], Omnisend_Settings::SOURCE_API );
+	}
+
+	if ( isset( $body['debug_logs_status'] ) ) {
+		Omnisend_Settings::set_debug_logs_status( $body['debug_logs_status'], Omnisend_Settings::SOURCE_API );
 	}
 }
 

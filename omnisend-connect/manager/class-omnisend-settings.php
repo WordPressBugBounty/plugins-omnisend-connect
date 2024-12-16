@@ -25,8 +25,9 @@ class Omnisend_Settings {
 	/**
 	 * @deprecated since version 1.14.0 use OPTION_LOGS_STATUS instead
 	 */
-	private const OPTION_LOG_ENABLED = 'omnisend_logEnabled';
-	private const OPTION_LOGS_STATUS = 'omnisend_logs_status';
+	private const OPTION_LOG_ENABLED       = 'omnisend_logEnabled';
+	private const OPTION_LOGS_STATUS       = 'omnisend_logs_status';
+	private const OPTION_DEBUG_LOGS_STATUS = 'omnisend_debug_logs_status';
 
 	private const OPTION_BRAND_ID = 'omnisend_account_id';
 
@@ -181,7 +182,7 @@ class Omnisend_Settings {
 	}
 
 	/**
-	 * @return bool
+	 * @return string
 	 */
 	public static function get_logs_status() {
 		$status = get_option( self::OPTION_LOGS_STATUS, '' );
@@ -205,6 +206,21 @@ class Omnisend_Settings {
 	 */
 	public static function set_logs_status( $value, $source ) {
 		self::set_option( self::OPTION_LOGS_STATUS, $value, $source, array( self::class, 'is_status' ) );
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function get_debug_logs_status() {
+		return get_option( self::OPTION_DEBUG_LOGS_STATUS, self::STATUS_DISABLED );
+	}
+
+	/**
+	 * @param string $value
+	 * @param string $source
+	 */
+	public static function set_debug_logs_status( $value, $source ) {
+		self::set_option( self::OPTION_DEBUG_LOGS_STATUS, $value, $source, array( self::class, 'is_status' ) );
 	}
 
 	/**
