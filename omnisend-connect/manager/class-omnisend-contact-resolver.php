@@ -98,6 +98,7 @@ class Omnisend_Contact_Resolver {
 		}
 
 		$response = json_decode( $curl_result['response'], true );
-		return $response['contacts'][0]['contactID'];
+
+		return isset( $response['contacts'][0]['contactID'] ) ? $response['contacts'][0]['contactID'] : null;
 	}
 }
