@@ -229,9 +229,8 @@ function omnisend_add_checkout_script() {
 			$file_name,
 			'omnisend_checkout_vars',
 			array(
-				'ajax_url'   => admin_url( 'admin-ajax.php' ),
-				'contact_id' => Omnisend_User_Storage::get_contact_id(),
-				'nonce'      => wp_create_nonce( 'omnisend-checkout-script-nonce' ),
+				'ajax_url' => admin_url( 'admin-ajax.php' ),
+				'nonce'    => wp_create_nonce( 'omnisend-checkout-script-nonce' ),
 			)
 		);
 		wp_enqueue_script( $file_name, $file_path, array(), '1.0.0', true );
