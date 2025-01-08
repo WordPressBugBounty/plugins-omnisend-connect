@@ -76,6 +76,7 @@ function omnisend_on_category_change( $term_id ) {
 function omnisend_category_delete( $post_id ) {
 	Omnisend_Logger::hook();
 	if ( Omnisend_Helper::is_woocommerce_plugin_activated() ) {
+		Omnisend_Sync::delete_category_meta_data( $post_id );
 		Omnisend_Manager::delete_category_from_omnisend( $post_id );
 	}
 }

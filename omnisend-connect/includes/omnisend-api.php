@@ -29,14 +29,26 @@ function omnisend_get_system_status() {
 		$web_server = explode( ' ', sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) )[0];
 	}
 
+	$technical_partner = null;
+	if ( isset( $_SERVER['H_PLATFORM'] ) ) {
+		$technical_partner = explode( ' ', sanitize_text_field( wp_unslash( $_SERVER['H_PLATFORM'] ) ) )[0];
+	}
+
+	$technical_partner_plan = null;
+	if ( isset( $_SERVER['H_TYPE'] ) ) {
+		$technical_partner_plan = explode( ' ', sanitize_text_field( wp_unslash( $_SERVER['H_TYPE'] ) ) )[0];
+	}
+
 	$body = array(
 		'connected'         => true,
 		'systemInfo'        => array(
-			'webserver'          => $web_server,
-			'phpVersion'         => PHP_VERSION,
-			'wordpressVersion'   => $wp_version,
-			'woocommerceVersion' => $woocommerce_version,
-			'pluginVersion'      => $plugin_version,
+			'webserver'            => $web_server,
+			'phpVersion'           => PHP_VERSION,
+			'wordpressVersion'     => $wp_version,
+			'woocommerceVersion'   => $woocommerce_version,
+			'pluginVersion'        => $plugin_version,
+			'technicalPartner'     => $technical_partner,
+			'technicalPartnerPlan' => $technical_partner_plan,
 		),
 		'omnisend_settings' => array(
 			'checkout_opt_in_status'             => Omnisend_Settings::get_checkout_opt_in_status(),
