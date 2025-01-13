@@ -58,6 +58,7 @@ function omnisend_get_system_status() {
 			'contact_tag'                        => Omnisend_Settings::get_contact_tag(),
 			'logs_status'                        => Omnisend_Settings::get_logs_status(),
 			'debug_logs_status'                  => Omnisend_Settings::get_debug_logs_status(),
+			'notices_status'                     => Omnisend_Settings::get_notices_status(),
 			'brand_id'                           => Omnisend_Settings::get_brand_id(),
 		),
 	);
@@ -98,6 +99,10 @@ function omnisend_post_omnisend_settings( WP_REST_Request $request ) {
 	if ( isset( $body['debug_logs_status'] ) ) {
 		Omnisend_Settings::set_debug_logs_status( $body['debug_logs_status'], Omnisend_Settings::SOURCE_API );
 	}
+
+	if ( isset( $body['notices_status'] ) ) {
+		Omnisend_Settings::set_notices_status( $body['notices_status'], Omnisend_Settings::SOURCE_API );
+	}
 }
 
 function omnisend_connect_account( WP_REST_Request $request ) {
@@ -129,6 +134,7 @@ function omnisend_post_disconnect() {
 
 		$response = new WP_REST_Response();
 		$response->set_status( 204 );
+
 		return $response;
 	}
 }
