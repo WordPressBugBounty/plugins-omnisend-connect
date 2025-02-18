@@ -205,6 +205,15 @@ function omnisend_add_snippet_script() {
 			$file_name = 'embed.js';
 			$file_path = OMNISEND_SNIPPET_URL . '?brandID=' . $omnisend_account_id . '&platform=woocommerce';
 
+			wp_register_script( $file_name, $file_path, array(), '1.0.0', true );
+			wp_localize_script(
+				$file_name,
+				'omnisend_snippet_vars',
+				array(
+					'brand_id' => $omnisend_account_id,
+					'platform' => 'woocommerce',
+				)
+			);
 			wp_enqueue_script( $file_name, $file_path, array(), '1.0.0', true );
 		}
 	}
