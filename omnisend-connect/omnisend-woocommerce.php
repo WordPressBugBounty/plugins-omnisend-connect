@@ -3,7 +3,7 @@
  * Plugin Name: Omnisend for WooCommerce
  * Plugin URI: https://www.omnisend.com
  * Description: 125,000+ ecommerce stores use Omnisend to sell more stuff to more people. Send newsletters & SMS and build email lists with popups.
- * Version: 1.15.33
+ * Version: 1.15.34
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
@@ -138,7 +138,7 @@ function omnisend_woocommerce_menu() {
 	// phpcs:enable
 
 	add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, 2 );
-	add_submenu_page( null, 'Omnisend Authorization', 'Omnisend Authorization', 'manage_options', OMNISEND_AUTHORIZATION_PAGE, 'omnisend_show_authorization_page' );
+	add_submenu_page( '', 'Omnisend Authorization', 'Omnisend Authorization', 'manage_options', OMNISEND_AUTHORIZATION_PAGE, 'omnisend_show_authorization_page' );
 }
 
 /**
