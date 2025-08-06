@@ -5,7 +5,7 @@ Tags: Email Marketing, SMS, Marketing, Newsletter, WooCommerce
 Requires at least: 4.7.0
 Tested up to: 6.8
 Requires PHP: 7.1
-Stable tag: 1.16.8
+Stable tag: 1.16.9
 License: GPLv3 or later License
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -316,6 +316,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 9. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.16.9 =
+
+* Fixed duplicate CSS loading for omnisend-checkout-block.css file.
 
 = 1.16.8 =
 
