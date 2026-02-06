@@ -19,7 +19,8 @@ class Omnisend_Manager {
 	 * @return bool
 	 */
 	public static function is_setup() {
-		if ( empty( get_option( 'omnisend_api_key', null ) ) ) {
+		$api_key = get_option( 'omnisend_api_key', null );
+		if ( empty( $api_key ) ) {
 			return false;
 		}
 
@@ -123,7 +124,8 @@ class Omnisend_Manager {
 	}
 
 	public static function delete_category_from_omnisend( $id ) {
-		if ( ! empty( get_option( 'omnisend_api_key', null ) ) ) {
+		$api_key = get_option( 'omnisend_api_key', null );
+		if ( ! empty( $api_key ) ) {
 			$link        = OMNISEND_API_URL . '/v3/categories/' . $id;
 			$curl_result = Omnisend_Helper::omnisend_api( $link, 'DELETE', array() );
 			if ( $curl_result['code'] >= 400 ) {
@@ -135,7 +137,8 @@ class Omnisend_Manager {
 
 	public static function push_product_to_omnisend( $product_id = '', $put = 0, $iter = 0 ) {
 		global $omnisend_product;
-		if ( ! empty( get_option( 'omnisend_api_key', null ) ) ) {
+		$api_key = get_option( 'omnisend_api_key', null );
+		if ( ! empty( $api_key ) ) {
 			$prepared_product = Omnisend_Product::create( $product_id );
 			// If all required fields are set, push product to Omnisend.
 			if ( $prepared_product ) {
@@ -186,94 +189,9 @@ class Omnisend_Manager {
 		}
 	}
 
-	public static function push_order_to_omnisend( $order_id ) {
-		if ( ! self::is_setup() ) {
-			return;
-		}
-
-		$order_object = Omnisend_Order::create( $order_id );
-		if ( ! $order_object ) {
-			$message = 'Unable to push Order #' . $order_id . ' to Omnisend. One or more required fields are empty or invalid';
-			Omnisend_Logger::log( 'warn', 'orders', '', $message );
-			Omnisend_Sync::mark_order_sync_as_skipped( $order_id );
-			return;
-		}
-
-		$order_array  = Omnisend_Helper::clean_model_from_empty_fields( $order_object );
-		$verbs_to_try = Omnisend_Sync::was_order_synced_before( $order_id ) ? array( self::VERB_PUT ) : array( self::VERB_POST, self::VERB_PUT );
-
-		foreach ( $verbs_to_try as $verb ) {
-			$api_url     = $verb == self::VERB_POST ? OMNISEND_API_URL . '/v3/orders' : OMNISEND_API_URL . '/v3/orders/' . $order_id;
-			$curl_result = Omnisend_Helper::omnisend_api( $api_url, $verb, $order_array );
-
-			if ( $curl_result['code'] >= 200 && $curl_result['code'] < 300 ) {
-				Omnisend_Logger::log( 'info', 'orders', $api_url, "Order #$order_id was successfully pushed to Omnisend." );
-				Omnisend_Sync_Stats_Repository::count_item( 'orders' );
-				Omnisend_Sync::mark_order_sync_as_synced( $order_id );
-				Omnisend_Contact_Resolver::update_by_email( $order_object->email );
-				return;
-			}
-
-			if ( in_array( $curl_result['code'], self::HTTP_STATUS_CODES_TO_RETRY_POST_IN_PUT ) ) {
-				Omnisend_Logger::log( 'warn', 'orders', $api_url, 'Unable to push order #' . $order_id . ' to Omnisend.' . $curl_result['response'] );
-				continue;
-			}
-
-			if ( $curl_result['code'] == 403 ) {
-				Omnisend_Logger::log( 'warn', 'orders', $api_url, "Unable to push order #$order_id to Omnisend. You don't have rights to push orders." );
-				break;
-			}
-
-			Omnisend_Logger::log( 'warn', 'orders', $api_url, "Unable to push order #$order_id to Omnisend. May be server error. " . $curl_result['response'] );
-			break;
-		}
-
-		Omnisend_Sync::mark_order_sync_as_error( $order_id );
-	}
-
-	public static function update_order_status( $order_id, $status_type, $order_status ) {
-		if ( ! self::is_setup() ) {
-			return;
-		}
-
-		/* Order is not synced - try to push */
-		if ( ! Omnisend_Sync::was_order_synced_before( $order_id ) ) {
-			self::push_order_to_omnisend( $order_id );
-			return;
-		}
-
-		/* Order already synced - try to update */
-		$post_data = array();
-
-		if ( $status_type == 'fulfillment' ) {
-			$post_data['fulfillmentStatus'] = $order_status;
-		} else {
-			$post_data['paymentStatus'] = $order_status;
-		}
-
-		if ( $order_status == 'voided' ) {
-			$post_data['canceledDate'] = gmdate( DATE_ATOM, time() );
-		}
-
-		$link        = OMNISEND_API_URL . '/v3/orders/' . $order_id;
-		$curl_result = Omnisend_Helper::omnisend_api( $link, 'PATCH', $post_data );
-
-		if ( $curl_result['code'] >= 200 && $curl_result['code'] < 300 ) {
-			Omnisend_Logger::log( 'info', 'orders', $link, "Order #$order_id status change ($order_status) was successfully pushed to Omnisend" );
-			Omnisend_Sync_Stats_Repository::count_item( 'orders' );
-			Omnisend_Sync::mark_order_sync_as_synced( $order_id );
-		} elseif ( $curl_result['code'] == 403 ) {
-			Omnisend_Logger::log( 'warn', 'orders', $link, 'Unable to push order #' . $order_id . " status change ($order_status) to Omnisend. You don't have rights to push orders." );
-		} elseif ( $curl_result['code'] == 400 || $curl_result['code'] == 404 || $curl_result['code'] == 422 ) {
-			Omnisend_Logger::log( 'warn', 'orders', $link, 'Unable to push order #' . $order_id . " status change ($order_status) to Omnisend. " . $curl_result['response'] );
-			Omnisend_Sync::mark_order_sync_as_error( $order_id );
-		} else {
-			Omnisend_Logger::log( 'warn', 'orders', $link, 'Unable to push order #' . $order_id . " status change ($order_status) to Omnisend. May be server error. " . $curl_result['response'] );
-		}
-	}
-
 	public static function delete_product_from_omnisend( $id ) {
-		if ( ! empty( get_option( 'omnisend_api_key', null ) ) ) {
+		$api_key = get_option( 'omnisend_api_key', null );
+		if ( ! empty( $api_key ) ) {
 			$link        = OMNISEND_API_URL . '/v3/products/' . $id;
 			$curl_result = Omnisend_Helper::omnisend_api( $link, 'DELETE', array() );
 
@@ -282,11 +200,13 @@ class Omnisend_Manager {
 	}
 
 	public static function update_account_info( $data = '' ) {
-		if ( ! empty( get_option( 'omnisend_api_key', null ) ) ) {
+		$api_key = get_option( 'omnisend_api_key', null );
+		if ( ! empty( $api_key ) ) {
 			if ( $data == '' ) {
 				$data = Omnisend_Helper::get_account_info();
 			}
-			$link        = OMNISEND_API_URL . '/v3/accounts/' . get_option( 'omnisend_account_id', null );
+			$account_id  = get_option( 'omnisend_account_id', null );
+			$link        = OMNISEND_API_URL . '/v3/accounts/' . $account_id;
 			$curl_result = Omnisend_Helper::omnisend_api( $link, 'POST', $data );
 			if ( $curl_result['code'] >= 200 && $curl_result['code'] < 300 ) {
 				Omnisend_Logger::log( 'info', 'account', $link, 'Account information has been updated.' );
@@ -301,7 +221,8 @@ class Omnisend_Manager {
 	}
 
 	public static function get_brand_info() {
-		if ( empty( get_option( 'omnisend_api_key', null ) ) ) {
+		$api_key = get_option( 'omnisend_api_key', null );
+		if ( empty( $api_key ) ) {
 			return array();
 		}
 

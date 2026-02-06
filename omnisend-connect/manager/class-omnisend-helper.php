@@ -184,7 +184,8 @@ class Omnisend_Helper {
 	}
 
 	public static function is_omnisend_connected() {
-		return (bool) get_option( 'omnisend_api_key', null );
+		$api_key = get_option( 'omnisend_api_key', null );
+		return (bool) $api_key;
 	}
 
 	public static function are_permalinks_correct() {
@@ -255,7 +256,8 @@ class Omnisend_Helper {
 			return getenv( 'HTTP_FORWARDED' );
 		}
 
-		return getenv( 'REMOTE_ADDR' );
+		$ip = getenv( 'REMOTE_ADDR' );
+		return $ip ? $ip : '';
 	}
 
 	public static function get_domain( $url ) {

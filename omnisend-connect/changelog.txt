@@ -1,5 +1,63 @@
 == Changelog ==
 
+= 1.17.2 =
+
+* Fixed changelog display.
+
+= 1.17.1 =
+
+* Fixed security vulnerabilities.
+* Update supported WordPress version to 6.9.
+
+= 1.17.0 =
+
+* Added new styles.
+
+= 1.16.10 =
+
+* Added site-specific disconnect functionality for WordPress Multisite installations.
+* Improved IP address resolution for events.
+
+= 1.16.9 =
+
+* Fixed duplicate CSS loading for omnisend-checkout-block.css file.
+
+= 1.16.8 =
+
+* Fixed description.
+
+= 1.16.7 =
+
+* Updated description and changed logo.
+
+= 1.16.6 =
+
+* Added sms consent option for checkout.
+
+= 1.16.5 =
+
+* Fix multisite detection breaking the site in some cases.
+
+= 1.16.4 =
+
+* Add pre-selectable checkout opt-in checkbox setting.
+
+= 1.16.3 =
+
+* Add checkout opt-in text field.
+
+= 1.16.2 =
+
+* Improve error messaging when plugin cannot be activated.
+
+= 1.16.1 =
+
+* Fix email marketing consent field description.
+
+= 1.16.0 =
+
+* Add new setting: option to turn off email marketing opt-in field in WooCommerce checkout.
+
 = 1.15.16 =
 
 * Add content-type headers on remote post methods.

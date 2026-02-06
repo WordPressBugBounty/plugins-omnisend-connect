@@ -3,9 +3,9 @@ Plugin Name: Email Marketing for WooCommerce by Omnisend
 Contributors: Omnisend
 Tags: Email Marketing, SMS, Marketing, Newsletter, WooCommerce
 Requires at least: 4.7.0
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.1
-Stable tag: 1.16.9
+Stable tag: 1.18.0
 License: GPLv3 or later License
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -317,129 +317,22 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 1.16.9 =
+= 1.18.0 =
 
-* Fixed duplicate CSS loading for omnisend-checkout-block.css file.
+* Orders are retrieved from WooCommerce API by Omnisend instead of plugin pushing them to Omnisend.
+* Removed order batch syncing functionality.
+* Removed order push functionality.
+* Updated sync status UI to reflect new order syncing method.
 
-= 1.16.8 =
+= 1.17.2 =
 
-* Fixed description.
+* Fixed changelog display.
 
-= 1.16.7 =
+= 1.17.1 =
 
-* Updated description and changed logo.
+* Fixed security vulnerabilities.
+* Update supported WordPress version to 6.9.
 
-= 1.16.6 =
+= 1.17.0 =
 
-* Added sms consent option for checkout. 
-
-= 1.16.5 =
-
-* Fix multisite detection breaking the site in some cases.
-
-= 1.16.4 =
-
-* Changed webhook doomain.
-
-= 1.16.3 =
-
-* Improved quality of contact info collected from logged in users.
-
-= 1.16.2 =
-
-* Added product variation title when syncing products to Omnisend.
-
-= 1.16.1 =
-
-* Updated supported WordPress version to 6.8.
-
-= 1.16.0 =
-
-* Added logic to support multisite setup.
-
-= 1.15.36 =
-
-* Improve JS script loading. 
-
-= 1.15.35 =
-
-* Improve JS script loading. 
-
-= 1.15.34 =
-
-* Fix php errors.
-
-= 1.15.33 =
-
-* Update description and change WooCommerce logo to new.
-
-= 1.15.32 =
-
-* Improve JS script caching.
-
-= 1.15.31 =
-
-* Add fallback params to a script loading.
-
-= 1.15.30 =
-
-* Improve scripts loading.
-
-= 1.15.29 =
-
-* Add omnisend_contact_data filter to allow custom contact data to be sent to Omnisend.
-* Add omnisend_cart_checkout_url_item filter to allow custom cart item data in checkout URL. This custom data is automatically recovered during cart recovery
-* Add omnisend_recover_cart_item_data filter to allow customizing recovered cart item data.
-
-= 1.15.28 =
-
-* Fix some error handling cases.
-
-= 1.15.27 =
-
-* Add notices in Omnisend plugin settings page.
-
-= 1.15.26 =
-
-* Improve category sync to omnisend.
-* Minor fixes.
-
-= 1.15.25 =
-
-* Unify omnisend contact id resolving in checkout.
-
-= 1.15.24 =
-
-* Improve omnisend contact id resolving for events.
-* Solve undefined array key exception in contact-resolver
-
-= 1.15.23 =
-
-* Improve plugin debug logs to enhance troubleshooting and provide better insights.
-
-= 1.15.22 =
-
-* Update WordPress listing.
-
-= 1.15.21 =
-
-* Add an endpoint for forcing authorization flow.
-
-= 1.15.20 =
-
-* Add "opt-in" checkbox support for checkout blocks.
-
-= 1.15.19 =
-
-* Minor fixes.
-
-= 1.15.18 =
-
-* Improved extracting logic for `added_item.link` property on `added product to cart` event.
-
-= 1.15.17 =
-
-* Remove Order property `phone` from root level to allow use `phone` and `countryCode` from billing information.
-* Test plugin with WordPress 6.6 version.
-* Test plugin with WooCommerce 9.1 version.
-
+* Added new styles.

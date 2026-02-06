@@ -3,7 +3,7 @@
  * Plugin Name: Omnisend for WooCommerce
  * Plugin URI: https://www.omnisend.com
  * Description: 150,000+ ecommerce stores use Omnisend to sell more stuff to more people. Send newsletters & SMS and build email lists with popups.
- * Version: 1.16.9
+ * Version: 1.18.0
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
@@ -66,12 +66,12 @@ require_once 'manager/class-omnisend-settings.php';
 require_once 'manager/class-omnisend-notifications.php';
 require_once 'manager/class-omnisend-content.php';
 require_once 'manager/class-omnisend-contact-cache.php';
+require_once 'manager/class-omnisend-disconnect-service.php';
 /*Include Model classes*/
 require_once 'model/class-omnisend-product.php';
 require_once 'model/class-omnisend-contact.php';
 require_once 'model/class-omnisend-cart.php';
 require_once 'model/class-omnisend-cart-event.php';
-require_once 'model/class-omnisend-order.php';
 require_once 'model/class-omnisend-category.php';
 require_once 'model/class-omnisend-sync.php';
 require_once 'model/class-omnisend-connection-error.php';
@@ -264,7 +264,8 @@ add_action( 'init', 'omnisend_init_crons' );
 function omnisend_activated() {
 	Omnisend_Logger::enable_logging();
 
-	$first_activation = ! get_option( 'omnisend_account_id', null );
+	$account_id       = get_option( 'omnisend_account_id', null );
+	$first_activation = ! $account_id;
 
 	if ( $first_activation ) {
 		$default_checkout_opt_in_text = 'Email me with news and offers';
@@ -349,6 +350,7 @@ register_uninstall_hook( __FILE__, 'omnisend_uninstall' );
 function omnisend_uninstall() {
 	Omnisend_Install::uninstall();
 }
+
 
 add_filter( 'allowed_redirect_hosts', 'omnisend_add_allowed_redirect_hosts' );
 function omnisend_add_allowed_redirect_hosts( $domains ) {

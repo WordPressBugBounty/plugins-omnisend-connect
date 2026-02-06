@@ -16,9 +16,9 @@ export const Edit = () => {
 
 	return (
 		<div { ...blockProps } id="omnisend-subscribe-block">
-				<CheckboxControl style={{ marginTop: 0, lineHeight: 'normal' }}  id="newsletter-text" checked={ newsletter.optInPreselected } disabled={ true }>
+			<CheckboxControl style={{ marginTop: 0, lineHeight: 'normal' }}  id="newsletter-text" checked={ newsletter.optInPreselected } disabled={ true }>
 				{newsletter.optInText}
-				</CheckboxControl>
+			</CheckboxControl>
 		</div>
 	);
 };

@@ -7,12 +7,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 class Omnisend_Sync_Stats_Repository {
-	const POST_STATUS_PUBLISH  = 'publish';
-	const POST_TYPE_SHOP_ORDER = 'shop_order';
-	const POST_TYPE_PRODUCT    = 'product';
+	const POST_STATUS_PUBLISH = 'publish';
+	const POST_TYPE_PRODUCT   = 'product';
 
 	public static function count_item( $endpoint, $inc = 1 ) {
 		$key   = 'omnisend_' . $endpoint . '_sync_count';
@@ -26,7 +23,6 @@ class Omnisend_Sync_Stats_Repository {
 	public function get_all_stats() {
 		return new Omnisend_All_Sync_Stats(
 			$this->get_contact_stats(),
-			$this->get_order_stats(),
 			$this->get_product_stats(),
 			$this->get_category_stats()
 		);
@@ -105,57 +101,6 @@ class Omnisend_Sync_Stats_Repository {
 		);
 
 		return ( new WP_User_Query( array_merge( $general, $query_params ) ) )->get_total();
-	}
-
-	/**
-	 * @return Omnisend_Sync_Stats
-	 */
-	private function get_order_stats() {
-		// HPOS is enabled.
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			return $this->get_stats_from_orders();
-		}
-
-		// Traditional CPT-based orders are in use.
-		return $this->get_stats_from_posts( self::POST_TYPE_SHOP_ORDER );
-	}
-
-	/**
-	 * @return Omnisend_Sync_Stats
-	 */
-	private function get_stats_from_orders() {
-		global $wpdb;
-
-		$sql = $wpdb->prepare(
-			"SELECT 
-				COUNT(o.id) as total,
-				SUM(IF(meta.meta_value LIKE %s, 1, 0)) as synced,
-				SUM(IF(meta.meta_value IS NULL, 1, 0)) as notSynced,
-				SUM(IF(meta.meta_value = %s, 1, 0)) as skipped,
-				SUM(IF(meta.meta_value = %s, 1, 0)) as error
-			FROM {$wpdb->prefix}wc_orders AS o
-			LEFT JOIN {$wpdb->prefix}wc_orders_meta AS meta ON meta.order_id = o.id AND meta.meta_key = %s
-			WHERE o.type = %s
-			GROUP by '1';
-			",
-			'20%',
-			Omnisend_Sync::STATUS_SKIPPED,
-			Omnisend_Sync::STATUS_ERROR,
-			Omnisend_Sync::FIELD_NAME,
-			self::POST_TYPE_SHOP_ORDER
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$info = $wpdb->get_row( $sql, ARRAY_A );
-
-		return new Omnisend_Sync_Stats(
-			$this->get_array_field_or_zero( $info, 'total' ),
-			$this->get_array_field_or_zero( $info, 'total' ),
-			$this->get_array_field_or_zero( $info, 'synced' ),
-			$this->get_array_field_or_zero( $info, 'notSynced' ),
-			$this->get_array_field_or_zero( $info, 'skipped' ),
-			$this->get_array_field_or_zero( $info, 'error' )
-		);
 	}
 
 	/**

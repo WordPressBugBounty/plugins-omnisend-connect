@@ -127,16 +127,20 @@ function omnisend_connect_account( WP_REST_Request $request ) {
 	return array( 'success' => true );
 }
 
-function omnisend_post_disconnect() {
-	if ( Omnisend_Helper::is_omnisend_connected() ) {
-		Omnisend_Logger::info( 'Disconnecting plugin via API' );
-		Omnisend_Install::disconnect();
+function omnisend_post_disconnect_current_site() {
+	$result = Omnisend_Disconnect_Service::disconnect_current_site();
 
+	if ( $result['success'] ) {
 		$response = new WP_REST_Response();
 		$response->set_status( 204 );
-
 		return $response;
 	}
+
+	return new WP_Error(
+		'disconnect_failed',
+		$result['message'],
+		array( 'status' => 400 )
+	);
 }
 
 function validate_connect_token( WP_REST_Request $request ) {
@@ -218,10 +222,10 @@ add_action(
 		);
 		register_rest_route(
 			'omnisend-api/v1',
-			'/disconnect',
+			'/disconnect-current-site',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => 'omnisend_post_disconnect',
+				'callback'            => 'omnisend_post_disconnect_current_site',
 				'permission_callback' => 'omnisend_rest_api_authorization',
 			)
 		);

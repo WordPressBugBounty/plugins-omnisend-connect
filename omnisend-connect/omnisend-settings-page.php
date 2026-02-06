@@ -56,11 +56,23 @@ function display_settings() {
 		omnisend_display_permalink_notice( 'top' );
 		omnisend_display_api_access_granted_notice();
 		omnisend_display_api_bad_status_notice();
-		omnisend_display_account_information();
-		omnisend_display_checkout_opt_in_checkbox_settings();
-		omnisend_display_tag_settings();
-		display_plugin_version();
 		?>
+		<div class="settings-main-wrapper">
+			<div class="settings-main-content">
+				<?php
+				omnisend_display_account_information();
+				omnisend_display_checkout_opt_in_checkbox_settings();
+				omnisend_display_tag_settings();
+				?>
+			</div>
+			<div class="omnisend-sidebar-cards">
+				<?php omnisend_display_help_card(); ?>
+				<?php if ( is_multisite() ) : ?>
+					<?php omnisend_display_connection_card(); ?>
+				<?php endif; ?>
+				<?php omnisend_display_about_card(); ?>
+			</div>
+		</div>
 	</div>
 	<?php
 }
@@ -143,4 +155,42 @@ function display_plugin_version() {
 	<?php
 }
 
-?>
+function omnisend_display_help_card() {
+	?>
+	<div class="omnisend-sidebar-card">
+		<h4>Need help?</h4>
+		<div class="omnisend-content-body">
+			Find docs and best practices to get the most out of Omnisend.
+		</div>
+		<div>
+			<a href="https://support.omnisend.com/en/articles/1636174-omnisend-for-woocommerce-wordpress" target="_blank">Learn more about Omnisend</a>
+		</div>
+	</div>
+	<?php
+}
+
+function omnisend_display_connection_card() {
+	?>
+	<div class="omnisend-sidebar-card">
+		<h4>Connection</h4>
+		<button class="omnisend-disconnect-button" onclick="disconnectCurrentSite()">
+			Reset Plugin Connection
+		</button>
+		<div class="omnisend-content-body omnisend-margin-top-medium omnisend-font-small">
+			No data is deleted. <a href="https://support.omnisend.com/en/articles/1279825-connect-your-store" target="_blank">Disconnect brand?</a>
+		</div>
+	</div>
+	<?php
+}
+
+function omnisend_display_about_card() {
+	$omnisend_plugin_version = Omnisend_Helper::omnisend_plugin_version();
+	?>
+	<div class="omnisend-sidebar-card">
+		<h4>About this plugin</h4>
+		<div class="omnisend-content-body">
+			Omnisend Plugin for WooCommerce — v<?php echo esc_html( $omnisend_plugin_version ); ?>
+		</div>
+	</div>
+	<?php
+}

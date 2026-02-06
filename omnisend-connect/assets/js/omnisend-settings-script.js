@@ -107,3 +107,41 @@ jQuery(document).ready(function ($) {
         element.addEventListener('click', handler);
     }
 });
+
+function disconnectCurrentSite() {
+    if (!confirm('Are you sure you want to disconnect this site from Omnisend?')) {
+        return;
+    }
+    
+    const button = document.querySelector('.omnisend-disconnect-button');
+    if (!button) {
+        console.error('Disconnect button not found');
+        return;
+    }
+    
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Disconnecting...';
+    
+    jQuery.ajax({
+        url: ajaxurl,
+        type: 'POST',
+        data: {
+            action: 'omnisend_disconnect_current_site',
+            _wpnonce: omnisend_settings_script_var.nonce
+        },
+        success: function(response) {
+            if (response.success) {
+                location.reload(); // Refresh to show disconnected state
+            } else {
+                throw new Error(response.data || 'Disconnect failed');
+            }
+        },
+        error: function(xhr, status, error) {
+            button.disabled = false;
+            button.textContent = originalText;
+            const errorMessage = xhr.responseJSON?.data || 'Failed to disconnect site. Please try again.';
+            alert(errorMessage);
+        }
+    });
+}

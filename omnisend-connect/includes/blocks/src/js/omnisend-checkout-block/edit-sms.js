@@ -16,9 +16,9 @@ export const EditSms = () => {
 
 	return (
 		<div { ...blockProps } id="omnisend-subscribe-block">
-				<CheckboxControl style={{ marginTop: 0, lineHeight: 'normal' }}  id="sms-text" disabled={ true }>
+			<CheckboxControl style={{ marginTop: 0, lineHeight: 'normal' }}  id="sms-text" disabled={ true }>
 				{sms.optInText}
-				</CheckboxControl>
+			</CheckboxControl>
 		</div>
 	);
 };

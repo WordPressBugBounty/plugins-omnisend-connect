@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 function omnisend_display_tabs( $active = 'General' ) {
 	?>
-	<div class="settings-section">
+	<div class="omnisend-tabs-container">
 		<div class="omnisend-navigation-tabs">
 			<a class="omnisend-tab <?php echo ( $active === 'General' ? 'active' : '' ); ?>" href="<?php echo esc_url( admin_url( 'admin.php?page=' . OMNISEND_SETTINGS_PAGE ) ); ?>">
 				General

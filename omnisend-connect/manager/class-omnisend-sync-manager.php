@@ -7,8 +7,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 class Omnisend_Sync_Manager {
 
 	public static function start_contacts() {
@@ -63,55 +61,6 @@ class Omnisend_Sync_Manager {
 	public static function start_resync_contacts() {
 		delete_metadata( 'user', '0', Omnisend_Sync::FIELD_NAME, '', true );
 		self::start_contacts();
-	}
-
-	public static function start_orders() {
-		delete_option( 'omnisend_sync_orders_finished' );
-		self::schedule_orders_sync();
-	}
-
-	public static function start_orders_if_not_finished() {
-		$is_finished = get_option( 'omnisend_sync_orders_finished', 0 ) == 1;
-
-		if ( $is_finished ) {
-			Omnisend_Logger::info( 'Order sync is already finished' );
-			return;
-		}
-
-		self::schedule_orders_sync();
-	}
-
-	public static function finish_orders() {
-		Omnisend_Logger::info( 'Order sync finished' );
-		update_option( 'omnisend_sync_orders_finished', 1 );
-
-		if ( wp_next_scheduled( 'omnisend_init_orders_sync' ) ) {
-			wp_clear_scheduled_hook( 'omnisend_init_orders_sync' );
-		}
-	}
-
-	public static function stop_orders( $reason ) {
-		Omnisend_Logger::warning( 'Order sync stopped: ' . $reason );
-
-		if ( wp_next_scheduled( 'omnisend_init_orders_sync' ) ) {
-			wp_clear_scheduled_hook( 'omnisend_init_orders_sync' );
-		}
-	}
-
-	public static function are_orders_syncing() {
-		if ( wp_next_scheduled( 'omnisend_init_orders_sync' ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public static function is_orders_finished() {
-		if ( get_option( 'omnisend_sync_orders_finished' ) == 1 ) {
-			return true;
-		}
-
-		return false;
 	}
 
 	public static function start_products() {
@@ -236,32 +185,13 @@ class Omnisend_Sync_Manager {
 		delete_metadata( 'user', '0', Omnisend_Sync::FIELD_NAME, Omnisend_Sync::STATUS_SKIPPED, true );
 		delete_metadata( 'post', '0', Omnisend_Sync::FIELD_NAME, Omnisend_Sync::STATUS_SKIPPED, true );
 
-		// HPOS is enabled.
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			global $wpdb;
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key = %s AND meta_value IN (%s, %s)",
-					Omnisend_Sync::FIELD_NAME,
-					Omnisend_Sync::STATUS_ERROR,
-					Omnisend_Sync::STATUS_SKIPPED
-				)
-			);
-		}
-
 		self::start_contacts();
-		self::start_orders();
 		self::start_products();
 		self::start_categories();
 	}
 
 	public static function are_data_syncing() {
 		if ( self::are_contacts_syncing() ) {
-			return true;
-		}
-
-		if ( self::are_orders_syncing() ) {
 			return true;
 		}
 
@@ -281,10 +211,6 @@ class Omnisend_Sync_Manager {
 			return false;
 		}
 
-		if ( self::are_orders_syncing() ) {
-			return false;
-		}
-
 		if ( self::are_products_syncing() ) {
 			return false;
 		}
@@ -300,18 +226,6 @@ class Omnisend_Sync_Manager {
 
 		Omnisend_Logger::info( 'Contact sync started' );
 		wp_schedule_event( time(), 'omnisend_every_two_minutes', 'omnisend_init_contacts_sync' );
-
-		self::start_check_batches_if_not_started();
-	}
-
-	private static function schedule_orders_sync() {
-		if ( wp_next_scheduled( 'omnisend_init_orders_sync' ) ) {
-			Omnisend_Logger::info( 'Order sync is already started' );
-			return;
-		}
-
-		Omnisend_Logger::info( 'Order sync started' );
-		wp_schedule_event( time(), 'omnisend_every_two_minutes', 'omnisend_init_orders_sync' );
 
 		self::start_check_batches_if_not_started();
 	}

@@ -77,6 +77,38 @@ function omnisend_update_plugin_setting() {
 	exit;
 }
 
+add_action( 'wp_ajax_omnisend_disconnect_current_site', 'omnisend_disconnect_current_site' );
+
+function omnisend_disconnect_current_site() {
+	check_ajax_referer( 'omnisend-settings-script-nonce' );
+
+	Omnisend_Logger::hook();
+	$result = Omnisend_Disconnect_Service::disconnect_current_site();
+
+	if ( $result['success'] ) {
+		wp_send_json_success( $result['message'] );
+	} else {
+		wp_send_json_error( $result['message'] );
+	}
+}
+
+add_action( 'wp_ajax_omnisend_toggle_logging', 'omnisend_toggle_logging' );
+
+function omnisend_toggle_logging() {
+	check_ajax_referer( 'omnisend_logs' );
+
+	Omnisend_Logger::hook();
+	$enable = isset( $_POST['enable'] ) ? sanitize_text_field( wp_unslash( $_POST['enable'] ) ) : '0';
+
+	if ( '1' === $enable ) {
+		Omnisend_Logger::enable_logging();
+		wp_send_json_success( 'Logging enabled' );
+	} else {
+		Omnisend_Logger::disable_logging();
+		wp_send_json_success( 'Logging disabled' );
+	}
+}
+
 class Omnisend_Ajax {
 	/**
 	 * @return Omnisend_Operation_Status

@@ -14,10 +14,6 @@ class Omnisend_User_Storage {
 	 */
 	private static $params_set_in_process = array();
 
-	public static function get_attribution_id() {
-		return self::get( 'omnisendAttributionID' );
-	}
-
 	public static function get_contact_id() {
 		return self::get( 'omnisendContactID' );
 	}

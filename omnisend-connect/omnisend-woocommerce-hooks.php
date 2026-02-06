@@ -97,97 +97,14 @@ function omnisend_on_user_register( $user_id ) {
 	Omnisend_Contact_Resolver::update_by_user_id( $user_id );
 }
 
-/* ORDERS */
-
-/* Hook for triggering action when order created */
-add_action( 'woocommerce_checkout_update_order_meta', 'omnisend_order_created', 20, 2 );
-function omnisend_order_created( $order_id ) {
+/* CARTS */
+/* Hook for triggering action when order created. Resets cart ID after order is created */
+add_action( 'woocommerce_checkout_update_order_meta', 'omnisend_reset_cart', 20, 2 );
+function omnisend_reset_cart() {
 	Omnisend_Logger::hook();
-
-	$cart_id        = Omnisend_Cart::get_or_set_cart_id();
-	$attribution_id = Omnisend_User_Storage::get_attribution_id();
-
-	if ( $cart_id || $attribution_id ) {
-		$order = wc_get_order( $order_id );
-
-		if ( $cart_id ) {
-			$order->add_meta_data( 'omnisend_cartID', $cart_id, true );
-		}
-
-		if ( $attribution_id ) {
-			$order->add_meta_data( 'omnisendAttributionID', $attribution_id, true );
-		}
-
-		$order->save();
-	}
-
-	Omnisend_Manager::push_order_to_omnisend( $order_id );
 	Omnisend_Cart::reset();
 }
 
-/* Hook triggered when admin updates order */
-add_action( 'woocommerce_process_shop_order_meta', 'omnisend_order_updated', 50, 2 );
-function omnisend_order_updated( $order_id ) {
-	Omnisend_Logger::hook();
-	if ( is_admin() ) {
-		Omnisend_Manager::push_order_to_omnisend( $order_id );
-	}
-}
-
-/*
-Fulfillment statuses.
-Hook for triggering action when order status is changed to Processing */
-add_action( 'woocommerce_order_status_processing', 'omnisend_order_processing', 10, 1 );
-function omnisend_order_processing( $order_id ) {
-	Omnisend_Logger::hook();
-	Omnisend_Manager::update_order_status( $order_id, 'fulfillment', 'inProgress' );
-}
-
-/* Hook for triggering action when order status is changed to Completed */
-add_action( 'woocommerce_order_status_completed', 'omnisend_order_completed', 10, 1 );
-function omnisend_order_completed( $order_id ) {
-	Omnisend_Logger::hook();
-	Omnisend_Manager::update_order_status( $order_id, 'fulfillment', 'fulfilled' );
-}
-
-/*
-Payment statuses.
-Hook for triggering action when order status is changed to Pending */
-add_action( 'woocommerce_order_status_pending', 'omnisend_order_pending', 10, 1 );
-function omnisend_order_pending( $order_id ) {
-	Omnisend_Logger::hook();
-	Omnisend_Manager::update_order_status( $order_id, 'payment', 'awaitingPayment' );
-}
-
-/* Hook for triggering action when order status is changed to Cancelled */
-add_action( 'woocommerce_order_status_cancelled', 'omnisend_order_cancelled', 10, 1 );
-function omnisend_order_cancelled( $order_id ) {
-	Omnisend_Logger::hook();
-	Omnisend_Manager::update_order_status( $order_id, 'payment', 'voided' );
-}
-
-/* Hook for triggering action when order status is changed to Refunded */
-add_action( 'woocommerce_order_status_refunded', 'omnisend_order_refunded', 10, 1 );
-function omnisend_order_refunded( $order_id ) {
-	Omnisend_Logger::hook();
-	Omnisend_Manager::update_order_status( $order_id, 'payment', 'refunded' );
-}
-
-/* Hook for triggering action when order Payment is complete */
-add_action( 'woocommerce_payment_complete', 'omnisend_order_payment_completed', 10, 1 );
-function omnisend_order_payment_completed( $order_id ) {
-	Omnisend_Logger::hook();
-	Omnisend_Manager::update_order_status( $order_id, 'payment', 'paid' );
-}
-
-/* Hook for triggering action when order Payment failed (order status set to Failed) */
-add_action( 'woocommerce_order_status_failed', 'omnisend_order_payment_failed', 10, 1 );
-function omnisend_order_payment_failed( $order_id ) {
-	Omnisend_Logger::hook();
-	Omnisend_Manager::update_order_status( $order_id, 'payment', 'awaitingPayment' );
-}
-
-/* CARTS */
 add_action( 'woocommerce_add_to_cart', 'omnisend_track_add_to_cart_event', 25, 5 );
 function omnisend_track_add_to_cart_event( $cart_item_key, $product_id, $request_quantity, $variation_id, $variation ) {
 	Omnisend_Logger::hook();
@@ -466,7 +383,8 @@ function omnisend_setup_omnisend_settings() {
 }
 
 function omnisend_update_plugin_information() {
-	if ( ! empty( get_option( 'omnisend_api_key', null ) ) ) {
+	$api_key = get_option( 'omnisend_api_key', null );
+	if ( ! empty( $api_key ) ) {
 		Omnisend_Manager::update_account_info();
 	}
 }

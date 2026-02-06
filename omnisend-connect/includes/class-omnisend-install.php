@@ -59,21 +59,47 @@ class Omnisend_Install {
 	}
 
 	public static function uninstall() {
-		self::delete_logs();
-		self::revoke_omnisend_woo_api_keys();
-		self::delete_options();
-		self::delete_metadata();
+		self::cleanup_all_sites();
 	}
 
 	public static function disconnect() {
-		self::delete_omnisend_webhooks();
-		self::revoke_omnisend_woo_api_keys();
-		self::delete_store_connection_options();
-		self::delete_metadata();
+		self::cleanup_all_sites();
+	}
+
+	public static function disconnect_current_site() {
+		self::cleanup_current_site();
 	}
 
 	public static function deactivate() {
 		self::delete_omnisend_webhooks();
+	}
+
+	/**
+	 * Clean up Omnisend data from all sites (multisite-aware).
+	 */
+	private static function cleanup_all_sites() {
+		if ( is_multisite() ) {
+			$sites = get_sites();
+			foreach ( $sites as $site ) {
+				switch_to_blog( $site->blog_id );
+				self::cleanup_current_site();
+				restore_current_blog();
+			}
+		} else {
+			self::cleanup_current_site();
+		}
+	}
+
+	/**
+	 * Clean up Omnisend data from the current site.
+	 */
+	private static function cleanup_current_site() {
+		self::delete_logs();
+		self::delete_omnisend_webhooks();
+		self::revoke_omnisend_woo_api_keys();
+		self::delete_options();
+		self::delete_store_connection_options();
+		self::delete_metadata();
 	}
 
 	private static function revoke_omnisend_woo_api_keys() {
@@ -120,14 +146,22 @@ class Omnisend_Install {
 
 	private static function delete_logs() {
 		global $wpdb;
+
 		$table_name = $wpdb->prefix . 'omnisend_logs';
-		$sql        = "IF EXISTS(SELECT * FROM   $table_name) DROP TABLE $table_name";
-		include_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		dbDelta( $sql );
+		$sql        = "DROP TABLE IF EXISTS $table_name";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( $sql );
+
+		// Also delete contact cache table.
+		$table_name = $wpdb->prefix . 'omnisend_contact_cache';
+		$sql        = "DROP TABLE IF EXISTS $table_name";
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( $sql );
 	}
 
 	private static function delete_options() {
 		global $wpdb;
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'omnisend_%'" );
 
@@ -139,14 +173,23 @@ class Omnisend_Install {
 	private static function delete_store_connection_options() {
 		delete_option( 'omnisend_api_key' );
 		delete_option( 'omnisend_account_id' );
+		delete_option( 'omnisend_connect_token' );
+		delete_option( 'omnisend_environment' );
+		delete_option( 'omnisend_connected_domain' );
+		delete_option( 'omnisend_plugin_version' );
+		delete_option( 'omnisend_wp_version' );
+		delete_option( 'omnisend_batches_inProgress' );
+		delete_option( 'omnisend_woo_partner_link' );
 	}
 
 	private static function delete_metadata() {
 		global $wpdb;
+
 		delete_metadata( 'user', '0', Omnisend_Sync::FIELD_NAME, '', true );
 		delete_metadata( 'post', '0', Omnisend_Sync::FIELD_NAME, '', true );
 		delete_metadata( 'term', '0', Omnisend_Sync::FIELD_NAME, '', true );
 
+		// Delete WooCommerce order metadata.
 		if ( class_exists( OrderUtil::class ) && OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key LIKE 'omnisend_%'" );

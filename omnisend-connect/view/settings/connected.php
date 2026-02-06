@@ -16,11 +16,14 @@ function omnisend_display_omnisend_connected() {
 			</a>
 			<div class="tag">Connected to Omnisend</div>
 		</div>
-		<a href="<?php echo esc_url( OMNISEND_ONBOARDING_URL ); ?>" target="_blank">
-			<button class="omnisend-secondary-button">
-				Go to Omnisend <img src="<?php echo esc_url( plugin_dir_url( __NAMESPACE__ ) ) . 'omnisend-connect/assets/img/kb-icon.svg'; ?>">
-			</button>
-		</a>
+		<div class="connected-actions">
+			<a href="<?php echo esc_url( OMNISEND_ONBOARDING_URL ); ?>" target="_blank">
+				<button class="omnisend-secondary-button">
+					Go to Omnisend <img src="<?php echo esc_url( plugin_dir_url( __NAMESPACE__ ) ) . 'omnisend-connect/assets/img/kb-icon.svg'; ?>">
+				</button>
+			</a>
+		</div>
 	</div>
 	<?php
 }
+?>
