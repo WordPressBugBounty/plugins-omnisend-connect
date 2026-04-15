@@ -147,32 +147,28 @@ function validate_connect_token( WP_REST_Request $request ) {
 	$body = json_decode( $request->get_body(), true );
 
 	if ( ! isset( $body['connect_token'] ) ) {
-		return new WP_Error(
-			'omnisend_missing_connect_token',
-			'Missing connect token in request.',
-			array( 'status' => 400 )
-		);
+		return omnisend_connect_token_invalid_error();
 	}
 
 	$token = get_option( 'omnisend_connect_token', '' );
 
 	if ( $token === '' ) {
-		return new WP_Error(
-			'omnisend_connect_denied',
-			'Connect token is already used.',
-			array( 'status' => 403 )
-		);
+		return omnisend_connect_token_invalid_error();
 	}
 
-	if ( $token !== $request['connect_token'] ) {
-		return new WP_Error(
-			'omnisend_incorrect_connect_token',
-			'Connect token is incorrect.',
-			array( 'status' => 401 )
-		);
+	if ( ! hash_equals( $token, (string) $request['connect_token'] ) ) {
+		return omnisend_connect_token_invalid_error();
 	}
 
 	return true;
+}
+
+function omnisend_connect_token_invalid_error() {
+	return new WP_Error(
+		'omnisend_invalid_connect_token',
+		'Connect token is invalid.',
+		array( 'status' => 403 )
+	);
 }
 
 function omnisend_rest_api_authorization( WP_REST_Request $request ) {

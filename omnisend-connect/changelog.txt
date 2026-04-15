@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 1.18.1 =
+
+* Improved connection token security to prevent predictable token abuse during store connection.
+* Unified invalid token responses on the connect endpoint to avoid leaking token state information.
+
 = 1.17.2 =
 
 * Fixed changelog display.

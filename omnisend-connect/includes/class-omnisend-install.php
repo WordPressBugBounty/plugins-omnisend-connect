@@ -231,7 +231,7 @@ class Omnisend_Install {
 		$token = get_option( 'omnisend_connect_token', '' );
 
 		if ( $token === '' ) {
-			$token = hash( 'sha256', time() );
+			$token = bin2hex( random_bytes( 32 ) );
 			update_option( 'omnisend_connect_token', $token );
 		}
 

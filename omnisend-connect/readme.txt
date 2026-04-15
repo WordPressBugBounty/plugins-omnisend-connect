@@ -5,7 +5,7 @@ Tags: Email Marketing, SMS, Marketing, Newsletter, WooCommerce
 Requires at least: 4.7.0
 Tested up to: 6.9
 Requires PHP: 7.1
-Stable tag: 1.18.0
+Stable tag: 1.18.1
 License: GPLv3 or later License
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -316,6 +316,11 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 9. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.18.1 =
+
+* Improved connection token security to prevent predictable token abuse during store connection.
+* Unified invalid token responses on the connect endpoint to avoid leaking token state information.
 
 = 1.18.0 =
 
