@@ -31,59 +31,6 @@ class Omnisend_Manager {
 		return true;
 	}
 
-	public static function push_contact_to_omnisend( $user_id ) {
-		if ( ! self::is_setup() ) {
-			return;
-		}
-
-		$user = get_userdata( $user_id );
-		if ( empty( $user ) ) {
-			Omnisend_Logger::log( 'warn', 'contacts', '', 'User not found' );
-			return;
-		}
-
-		$contact_object = Omnisend_Contact::create( $user );
-		if ( ! $contact_object ) {
-			Omnisend_Logger::log( 'warn', 'contacts', '', 'Contact was not created (missing required fields' );
-			return;
-		}
-
-		$contact_array = Omnisend_Helper::clean_model_from_empty_fields( $contact_object );
-		if ( Omnisend_Server_Session::get( 'omnisend_contact' ) == $contact_array ) {
-			return;
-		}
-
-		$contact_array = apply_filters( 'omnisend_contact_data', $contact_array, $user );
-
-		$api_url     = OMNISEND_API_URL . '/v3/contacts';
-		$curl_result = Omnisend_Helper::omnisend_api( $api_url, self::VERB_POST, $contact_array );
-		if ( $curl_result['code'] >= 200 && $curl_result['code'] < 300 ) {
-			$response = json_decode( $curl_result['response'], true );
-			if ( ! empty( $response['contactID'] ) ) {
-				Omnisend_Contact_Resolver::update_by_email_and_contact_id( $contact_object->email, $response['contactID'] );
-			}
-			Omnisend_Logger::log( 'info', 'contacts', $api_url, 'Contact ' . $contact_object->email . ' was successfully pushed to Omnisend.' );
-			Omnisend_Sync::mark_contact_as_synced( $user->ID );
-			Omnisend_Server_Session::set( 'omnisend_contact', $contact_array );
-			return;
-		}
-
-		if ( $curl_result['code'] == 403 ) {
-			Omnisend_Logger::log( 'warn', 'contacts', $api_url, 'Unable to push contact ' . $contact_object->email . " to Omnisend. You don't have rights to push contacts." );
-			Omnisend_Sync::mark_contact_as_error( $user->ID );
-			return;
-		}
-
-		if ( $curl_result['code'] == 400 || $curl_result['code'] == 422 ) {
-			Omnisend_Logger::log( 'warn', 'contacts', $api_url, 'Unable to push contact ' . $contact_object->email . ' to Omnisend.' . $curl_result['response'] );
-			Omnisend_Sync::mark_contact_as_error( $user->ID );
-			return;
-		}
-
-		Omnisend_Logger::log( 'warn', 'contacts', $api_url, 'Unable to push contact ' . $contact_object->email . ' to Omnisend. May be server error. ' . $curl_result['response'] );
-		Omnisend_Sync::mark_contact_as_error( $user->ID );
-	}
-
 	public static function push_category_to_omnisend( $term_id ) {
 		if ( ! self::is_setup() ) {
 			return;

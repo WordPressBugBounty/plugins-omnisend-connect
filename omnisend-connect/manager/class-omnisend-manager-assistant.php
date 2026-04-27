@@ -7,15 +7,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'omnisend_init_contacts_sync', 'omnisend_init_contacts_sync' );
 add_action( 'omnisend_init_products_sync', 'omnisend_init_products_sync' );
 add_action( 'omnisend_init_categories_sync', 'omnisend_init_categories_sync' );
 add_action( 'omnisend_batch_check', 'omnisend_batch_check' );
-
-function omnisend_init_contacts_sync() {
-	Omnisend_Manager_Assistant::sync_all_contacts();
-	exit;
-}
 
 function omnisend_init_products_sync() {
 	Omnisend_Manager_Assistant::sync_all_products();
@@ -46,7 +40,6 @@ class Omnisend_Manager_Assistant {
 		$i              = 0;
 		$remove_batches = array();
 		$renew_products = 0;
-		$renew_contacts = 0;
 
 		foreach ( $batches as $key => $batch_id ) {
 			$link     = OMNISEND_API_URL . '/v3/batches/' . $batch_id;
@@ -72,18 +65,6 @@ class Omnisend_Manager_Assistant {
 											if ( $last_sync != Omnisend_Sync::STATUS_ERROR && ( $last_sync < ( strtotime( $r['createdAt'] ) + 30 ) || $last_sync == '' ) ) {
 												delete_post_meta( $item['request']['productID'], Omnisend_Sync::FIELD_NAME );
 												$renew_products = 1;
-											}
-										} elseif ( $r['endpoint'] == 'contacts' ) {
-											$user = get_user_by( 'email', $item['request']['email'] );
-											if ( ! empty( $user ) ) {
-												$last_sync = get_user_meta( $user->ID, Omnisend_Sync::FIELD_NAME, true );
-												if ( $last_sync != '' && $last_sync != Omnisend_Sync::STATUS_ERROR ) {
-													$last_sync = strtotime( $last_sync );
-												}
-												if ( $last_sync != Omnisend_Sync::STATUS_ERROR && ( $last_sync < ( strtotime( $r['createdAt'] ) + 30 ) || $last_sync == '' ) ) {
-													delete_user_meta( $user->ID, Omnisend_Sync::FIELD_NAME );
-													$renew_contacts = 1;
-												}
 											}
 										}
 									}
@@ -114,98 +95,8 @@ class Omnisend_Manager_Assistant {
 		}
 
 		// Reschedule sync cron jobs.
-		if ( $renew_contacts == 1 ) {
-			Omnisend_Sync_Manager::start_contacts();
-		}
-
 		if ( $renew_products == 1 ) {
 			Omnisend_Sync_Manager::start_products();
-		}
-	}
-
-	// Sync contacts via batches.
-	public static function sync_all_contacts() {
-		Omnisend_Logger::hook();
-		if ( Omnisend_Sync_Manager::is_contacts_finished() ) {
-			return;
-		}
-
-		$api_key = get_option( 'omnisend_api_key', null );
-		if ( empty( $api_key ) ) {
-			Omnisend_Sync_Manager::stop_contacts( 'no API key' );
-			return;
-		}
-
-		$wp_user_query = new WP_User_Query(
-			array(
-				'number'     => 1000,
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					'relation' => 'OR',
-					array(
-						'key'     => Omnisend_Sync::FIELD_NAME,
-						'compare' => 'NOT EXISTS',
-						'value'   => '',
-					),
-				),
-			)
-		);
-		$users         = $wp_user_query->get_results();
-
-		if ( empty( $users ) ) {
-			Omnisend_Sync_Manager::finish_contacts();
-			return;
-		}
-
-		// Form batch request and save batchID.
-		$args                = array();
-		$args['method']      = 'POST';
-		$args['endpoint']    = 'contacts';
-		$args['items']       = array();
-		$skipped_contact_ids = array();
-		foreach ( $users as $user ) {
-			$contact_object = Omnisend_Contact::create( $user );
-			if ( $contact_object ) {
-				$contact_array   = Omnisend_Helper::clean_model_from_empty_fields( $contact_object );
-				$contact_array   = apply_filters( 'omnisend_contact_data', $contact_array, $user );
-				$args['items'][] = $contact_array;
-			} else {
-				$skipped_contact_ids[] = $user->ID;
-			}
-		}
-		$link     = OMNISEND_API_URL . '/v3/batches';
-		$response = Omnisend_Helper::omnisend_api( $link, 'POST', $args );
-		if ( $response['code'] >= 200 && $response['code'] < 300 ) {
-			$status   = gmdate( DATE_ATOM, time() );
-			$r        = json_decode( $response['response'], true );
-			$batch_id = $r['batchID'];
-			if ( strlen( $batch_id ) == 24 ) {
-				// Write batch to check response later.
-				$batches_in_progress = get_option( 'omnisend_batches_inProgress' );
-				if ( ! is_array( $batches_in_progress ) ) {
-					$batches_in_progress = array();
-				}
-				if ( ! in_array( $batch_id, $batches_in_progress ) ) {
-					$batches_in_progress[] = $batch_id;
-					if ( is_multisite() ) {
-						update_site_option( 'omnisend_batches_inProgress', $batches_in_progress );
-					} else {
-						update_option( 'omnisend_batches_inProgress', $batches_in_progress );
-					}
-				}
-				Omnisend_Logger::log( 'info', 'batches', $link, 'Batch sync: contacts were successfully pushed to Omnisend' );
-			} else {
-				Omnisend_Logger::log( 'warn', 'batches', $link, 'Batch sync error: unable to push contacts to Omnisend' );
-				$status = Omnisend_Sync::STATUS_ERROR;
-			}
-		} else {
-			Omnisend_Logger::log( 'warn', 'batches', $link, 'Batch sync error: unable to push contacts to Omnisend' );
-			$status = Omnisend_Sync::STATUS_ERROR;
-		}
-
-		foreach ( $users as $user ) {
-			// Update contact with last update date or mark it as "error" or "skipped".
-			$user_status = in_array( $user->ID, $skipped_contact_ids ) ? Omnisend_Sync::STATUS_SKIPPED : $status;
-			update_user_meta( $user->ID, Omnisend_Sync::FIELD_NAME, $user_status );
 		}
 	}
 
@@ -336,7 +227,6 @@ class Omnisend_Manager_Assistant {
 	}
 
 	public static function init_sync() {
-		Omnisend_Sync_Manager::start_contacts_if_not_finished();
 		Omnisend_Sync_Manager::start_products_if_not_finished();
 		Omnisend_Sync_Manager::start_categories_if_not_finished();
 	}

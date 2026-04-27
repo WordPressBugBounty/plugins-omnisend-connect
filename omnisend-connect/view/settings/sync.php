@@ -25,7 +25,7 @@ function omnisend_show_sync() {
 				<div class="omnisend-settings-card">
 				<h3>Sync Status</h3>
 				<div class="omnisend-content-body">
-					Your store data, like contacts, are automatically synced with Omnisend. The chart below displays the current sync status.
+					Your store data is automatically synced with Omnisend. The chart below displays the current sync status.
 				</div>
 				<div class="sync-stats">
 					<table class="wp-list-table widefat fixed striped posts">
@@ -47,40 +47,6 @@ function omnisend_show_sync() {
 					?>
 				</tr>
 				</thead>
-				<tr>
-					<td>Contacts</td>
-					<td id="contact-sync-success-count"><?php echo esc_html( $all_sync_stats->contacts->synced ); ?></td>
-					<td id="contact-sync-total-count">
-						<?php
-						if ( $all_sync_stats->contacts->unique && $all_sync_stats->contacts->unique != $all_sync_stats->contacts->total ) {
-							echo esc_html( $all_sync_stats->contacts->total ) . ' (Unique - ' . esc_html( $all_sync_stats->contacts->unique ) . ')';
-						} else {
-							echo esc_html( $all_sync_stats->contacts->total );
-						}
-						?>
-					</td>
-					<?php
-					if ( $all_sync_stats->contacts->not_synced > 0 ) {
-						echo '<td id="contact-sync-pending-count" class="omnisend-warn">' . esc_html( $all_sync_stats->contacts->not_synced ) . '</td>';
-					} else {
-						echo '<td id="contact-sync-pending-count">' . esc_html( $all_sync_stats->contacts->not_synced ) . '</td>';
-					}
-					?>
-					<?php
-					if ( $show_error ) {
-						if ( $all_sync_stats->contacts->error > 0 ) {
-							echo '<td id="contact-sync-error-count" class="omnisend-warn">' . esc_html( $all_sync_stats->contacts->error ) . '</td>';
-						} else {
-							echo '<td id="contact-sync-error-count">' . esc_html( $all_sync_stats->contacts->error ) . '</td>';
-						}
-					}
-					?>
-				<?php
-				if ( $show_skipped ) {
-					echo '<td id="contact-sync-skipped-count">' . esc_html( $all_sync_stats->contacts->skipped ) . '</td>';
-				}
-				?>
-			</tr>
 				<tr>
 					<td>Products</td>
 					<td id="product-sync-success-count"><?php echo esc_html( $all_sync_stats->products->synced ); ?></td>
@@ -137,17 +103,13 @@ function omnisend_show_sync() {
 				</div>
 				<div class="omnisend-content-body" style="margin-top: 20px; padding: 15px; background-color: #e7f3ff; border-left: 4px solid #2271b1;">
 					<p style="margin: 0;">
-						<strong>ℹ️ Note:</strong>We’re gradually moving data syncing from the plugin to our backend side. Orders now sync via the WooCommerce API, so order sync status is no longer shown here. Syncing continues automatically. If you notice any issues, please contact our support team.
+						<strong>ℹ️ Note:</strong> We’re gradually moving data syncing from the plugin to our backend side. Contacts and orders now sync via the WooCommerce API, so their sync status is no longer shown here. Syncing continues automatically. If you notice any issues, please contact our support team.
 					</p>
 				</div>
 				<?php
-				omnisend_display_sync_loader();
 				omnisend_display_sync_actions( $all_sync_stats );
 				?>
 			</div>
-				<?php
-				omnisend_display_resync_all_contacts();
-				?>
 			</div>
 		</div>
 	</div>
@@ -165,16 +127,10 @@ function omnisend_handle_sync_page_actions() {
 		case 'omnisend_init_resync':
 			Omnisend_Sync_Manager::start_resync_all_with_error_or_skipped();
 			break;
-		case 'omnisend_resync_all_contacts':
-			Omnisend_Sync_Manager::start_resync_contacts();
-			break;
 	}
 }
 
 function omnisend_has_sync_stats_error( $sync_stats ) {
-	if ( $sync_stats->contacts->error ) {
-		return true;
-	}
 	if ( $sync_stats->products->error ) {
 		return true;
 	}
@@ -186,9 +142,6 @@ function omnisend_has_sync_stats_error( $sync_stats ) {
 }
 
 function omnisend_has_sync_stats_skipped( $sync_stats ) {
-	if ( $sync_stats->contacts->skipped ) {
-		return true;
-	}
 	if ( $sync_stats->products->skipped ) {
 		return true;
 	}
@@ -200,9 +153,6 @@ function omnisend_has_sync_stats_skipped( $sync_stats ) {
 }
 
 function omnisend_has_sync_stats_not_synced( $sync_stats ) {
-	if ( $sync_stats->contacts->not_synced ) {
-		return true;
-	}
 	if ( $sync_stats->products->not_synced ) {
 		return true;
 	}
@@ -213,23 +163,7 @@ function omnisend_has_sync_stats_not_synced( $sync_stats ) {
 	return false;
 }
 
-function omnisend_display_sync_loader() {
-	if ( ! Omnisend_Sync_Manager::are_data_syncing() ) {
-		return;
-	}
-	?>
-	<div class="sync-loader">
-		<div class="sync-spinner"></div>
-		<span>Syncing...</span>
-	</div>
-	<?php
-}
-
 function omnisend_display_sync_actions( $all_sync_stats ) {
-	if ( Omnisend_Sync_Manager::are_data_syncing() ) {
-		return;
-	}
-
 	if ( ! omnisend_has_sync_stats_error( $all_sync_stats ) && ! omnisend_has_sync_stats_skipped( $all_sync_stats ) && ! omnisend_has_sync_stats_not_synced( $all_sync_stats ) ) {
 		return;
 	}
@@ -249,21 +183,3 @@ function omnisend_display_sync_actions( $all_sync_stats ) {
 	<?php
 }
 
-function omnisend_display_resync_all_contacts() {
-	if ( Omnisend_Sync_Manager::are_contacts_syncing() ) {
-		return;
-	}
-	?>
-	<div class="omnisend-settings-card">
-		<h3>Resync all contacts</h3>
-		<div class="omnisend-content-body">
-			Resync all of your contacts with Omnisend. The resync time depends on how many contacts you have.
-		</div>
-		<form method="post">
-			<?php wp_nonce_field( 'omnisend-sync-action' ); ?>
-			<input type="hidden" name="action" value="omnisend_resync_all_contacts">
-			<button type="submit" class="omnisend-primary-button">Resync all contacts</button>
-		</form>
-	</div>
-	<?php
-}

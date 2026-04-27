@@ -86,14 +86,12 @@ function omnisend_category_delete( $post_id ) {
 add_action( 'profile_update', 'omnisend_on_user_update', 10, 2 );
 function omnisend_on_user_update( $user_id ) {
 	Omnisend_Logger::hook();
-	Omnisend_Manager::push_contact_to_omnisend( $user_id );
 	Omnisend_Contact_Resolver::update_by_user_id( $user_id );
 }
 
 add_action( 'user_register', 'omnisend_on_user_register', 10, 1 );
 function omnisend_on_user_register( $user_id ) {
 	Omnisend_Logger::hook();
-	Omnisend_Manager::push_contact_to_omnisend( $user_id );
 	Omnisend_Contact_Resolver::update_by_user_id( $user_id );
 }
 
