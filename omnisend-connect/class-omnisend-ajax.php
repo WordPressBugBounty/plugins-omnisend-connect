@@ -41,6 +41,10 @@ add_action( 'wp_ajax_omnisend_update_plugin_setting', 'omnisend_update_plugin_se
 function omnisend_update_plugin_setting() {
 	check_ajax_referer( 'omnisend-settings-script-nonce' );
 
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+
 	Omnisend_Logger::hook();
 	$setting_name  = isset( $_POST['setting_name'] ) ? sanitize_text_field( wp_unslash( $_POST['setting_name'] ) ) : '';
 	$setting_value = isset( $_POST['setting_value'] ) ? sanitize_text_field( wp_unslash( $_POST['setting_value'] ) ) : '';
@@ -82,6 +86,10 @@ add_action( 'wp_ajax_omnisend_disconnect_current_site', 'omnisend_disconnect_cur
 function omnisend_disconnect_current_site() {
 	check_ajax_referer( 'omnisend-settings-script-nonce' );
 
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
+
 	Omnisend_Logger::hook();
 	$result = Omnisend_Disconnect_Service::disconnect_current_site();
 
@@ -96,6 +104,10 @@ add_action( 'wp_ajax_omnisend_toggle_logging', 'omnisend_toggle_logging' );
 
 function omnisend_toggle_logging() {
 	check_ajax_referer( 'omnisend_logs' );
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized', 403 );
+	}
 
 	Omnisend_Logger::hook();
 	$enable = isset( $_POST['enable'] ) ? sanitize_text_field( wp_unslash( $_POST['enable'] ) ) : '0';

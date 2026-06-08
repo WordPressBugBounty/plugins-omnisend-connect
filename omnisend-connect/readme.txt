@@ -5,7 +5,7 @@ Tags: Email Marketing, SMS, Marketing, Newsletter, WooCommerce
 Requires at least: 4.7.0
 Tested up to: 6.9
 Requires PHP: 7.1
-Stable tag: 1.19.0
+Stable tag: 1.19.1
 License: GPLv3 or later License
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -316,6 +316,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 9. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.19.1 =
+
+* Fixed broken access control in admin AJAX endpoints by adding capability checks.
 
 = 1.19.0 =
 
