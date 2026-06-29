@@ -3,9 +3,9 @@ Plugin Name: Email Marketing for WooCommerce by Omnisend
 Contributors: Omnisend
 Tags: Email Marketing, SMS, Marketing, Newsletter, WooCommerce
 Requires at least: 4.7.0
-Tested up to: 6.9
-Requires PHP: 7.1
-Stable tag: 1.19.1
+Tested up to: 7.0
+Requires PHP: 7.4
+Stable tag: 1.19.2
 License: GPLv3 or later License
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -121,15 +121,17 @@ https://www.youtube.com/watch?v=T0lm5ZfEPTw&t=42s
 
 Omnisend Email & SMS marketing reviews by other experts:
 
+https://www.youtube.com/watch?v=2fBxrhV3Nk0
+
+https://www.youtube.com/watch?v=By7qL9Wk44M
+
+https://www.youtube.com/watch?v=ggZ-FEZRDOU
+
+https://www.youtube.com/watch?v=bOnQ-45EJ_g
+
 https://www.youtube.com/watch?v=uOs_jZRnrJM
 
 https://www.youtube.com/watch?v=iMtrgsN53zw
-
-https://www.youtube.com/watch?v=NOFeGbORC_M
-
-https://www.youtube.com/watch?v=1AKhH3LXP7Q
-
-https://www.youtube.com/watch?v=CrXiK8XuDm0
 
 = NATIVE WOOCOMMERCE INTEGRATION: =
 
@@ -316,6 +318,13 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 9. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.19.2 =
+
+* Updated for WordPress 7.0 compatibility.
+* Bumped minimum PHP requirement to 7.4.
+* Updated block API version to 3.
+* Updated WordPress.org listing assets
 
 = 1.19.1 =
 
