@@ -5,7 +5,7 @@ Tags: Email Marketing, SMS, Marketing, Newsletter, WooCommerce
 Requires at least: 4.7.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.19.2
+Stable tag: 1.19.3
 License: GPLv3 or later License
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -318,6 +318,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 9. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.19.3 =
+
+* Fixed white screen on the Omnisend settings page caused by an overly broad CSS selector that could hide the page body when another plugin adds a notice-related class to it.
 
 = 1.19.2 =
 

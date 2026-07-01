@@ -470,7 +470,7 @@ add_action( 'in_admin_header', 'omnisend_control_notices' );
 function omnisend_control_notices(): void {
 		$screen = get_current_screen();
 	if ( $screen && ( $screen->id === 'toplevel_page_omnisend-woocommerce' ) ) {
-		echo '<style>[class*="notice"]:not([class*="components"], [class*="omnisend-notice"], .notice), .notice:not([class*="omnisend-notice"]) { display: none !important; }</style>';
+		echo '<style>div[class*="notice"]:not([class*="components"], [class*="omnisend-notice"], .notice), .notice:not([class*="omnisend-notice"]) { display: none !important; }</style>';
 	}
 }
 
